@@ -1,80 +1,68 @@
-// Prim's Algorithm in C++
-
-#include <cstring>
-#include <iostream>
+#include<iostream>
+#include<climits>
 using namespace std;
 
-#define INF 9999999
+// this method returns a minimum distance for the
+// vertex which is not included in Tset.
+int minimumDist(int dist[], bool Tset[])
+{
+	int min=INT_MAX,index;
 
-// number of vertices in grapj
-#define V 5
+	for(int i=0;i<6;i++)
+	{
+		if(Tset[i]==false && dist[i]<=min)
+		{
+			min=dist[i];
+			index=i;
+		}
+	}
+	return index;
+}
 
-// create a 2d array of size 5x5
-//for adjacency matrix to represent graph
+void Dijkstra(int graph[6][6],int src) // adjacency matrix used is 6x6
+{
+	int dist[6]; // integer array to calculate minimum distance for each node.
+	bool Tset[6];// boolean array to mark visted/unvisted for each node.
 
-int G[V][V] = {
-  {0, 9, 75, 0, 0},
-  {9, 0, 95, 19, 42},
-  {75, 95, 0, 51, 66},
-  {0, 19, 51, 0, 31},
-  {0, 42, 66, 31, 0}};
+	// set the nodes with infinity distance
+	// except for the initial node and mark
+	// them unvisited.
+	for(int i = 0; i<6; i++)
+	{
+		dist[i] = INT_MAX;
+		Tset[i] = false;
+	}
 
-int main() {
-  int no_edge;  // number of edge
+	dist[src] = 0;   // Source vertex distance is set to zero.
 
-  // create a array to track selected vertex
-  // selected will become true otherwise false
-  int selected[V];
+	for(int i = 0; i<6; i++)
+	{
+		int m=minimumDist(dist,Tset); // vertex not yet included.
+		Tset[m]=true;// m with minimum distance included in Tset.
+		for(int i = 0; i<6; i++)
+		{
+			// Updating the minimum distance for the particular node.
+			if(!Tset[i] && graph[m][i] && dist[m]!=INT_MAX && dist[m]+graph[m][i]<dist[i])
+				dist[i]=dist[m]+graph[m][i];
+		}
+	}
+	cout<<"Vertex\t\tDistance from source"<<endl;
+	for(int i = 0; i<6; i++)
+	{ //Printing
+		char str=65+i; // Ascii values for pritning A,B,C..
+		cout<<str<<"\t\t\t"<<dist[i]<<endl;
+	}
+}
 
-  // set selected false initially
-  memset(selected, false, sizeof(selected));
-
-  // set number of edge to 0
-  no_edge = 0;
-
-  // the number of egde in minimum spanning tree will be
-  // always less than (V -1), where V is number of vertices in
-  //graph
-
-  // choose 0th vertex and make it true
-  selected[0] = true;
-
-  int x;  //  row number
-  int y;  //  col number
-
-  // print for edge and weight
-  cout << "Edge"
-     << " : "
-     << "Weight";
-  cout << endl;
-  while (no_edge < V - 1) {
-    //For every vertex in the set S, find the all adjacent vertices
-    // , calculate the distance from the vertex selected at step 1.
-    // if the vertex is already in the set S, discard it otherwise
-    //choose another vertex nearest to selected vertex  at step 1.
-
-    int min = INF;
-    x = 0;
-    y = 0;
-
-    for (int i = 0; i < V; i++) {
-      if (selected[i]) {
-        for (int j = 0; j < V; j++) {
-          if (!selected[j] && G[i][j]) {  // not in selected and there is an edge
-            if (min > G[i][j]) {
-              min = G[i][j];
-              x = i;
-              y = j;
-            }
-          }
-        }
-      }
-    }
-    cout << x << " - " << y << " :  " << G[x][y];
-    cout << endl;
-    selected[y] = true;
-    no_edge++;
-  }
-
-  return 0;
+int main()
+{
+	int graph[6][6]={
+		{0, 10, 20, 0, 0, 0},
+		{10, 0, 0, 50, 10, 0},
+		{20, 0, 0, 20, 33, 0},
+		{0, 50, 20, 0, 20, 2},
+		{0, 10, 33, 20, 0, 1},
+		{0, 0, 0, 2, 1, 0}};
+	Dijkstra(graph,0);
+	return 0;
 }
