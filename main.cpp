@@ -1,152 +1,78 @@
-// C++ program to find all the reachable nodes
-// for every node present in arr[0..n-1].
+// C++ implementation of the approach
 #include <bits/stdc++.h>
 using namespace std;
+#define N 100000
 
-// This class represents a directed graph using
-// adjacency list representation
-class Graph
+// To keep correct and reverse direction
+vector<int> gr1[N], gr2[N];
+
+bool vis1[N], vis2[N];
+
+// Function to add edges
+void Add_edge(int u, int v)
 {
-public:
-	int V; // No. of vertices
-
-	// Pointer to an array containing adjacency lists
-	list<int> *adj;
-
-	Graph(int ); // Constructor
-
-	void addEdge(int, int);
-
-	vector<int> BFS(int, int, int []);
-};
-
-Graph::Graph(int V)
-{
-	this->V = V;
-	adj = new list<int>[V+1];
+	gr1[u].push_back(v);
+	gr2[v].push_back(u);
 }
 
-void Graph::addEdge(int u, int v)
+// DFS function
+void dfs1(int x)
 {
-	adj[u].push_back(v); // Add w to v’s list.
-	adj[v].push_back(u); // Add v to w’s list.
+	vis1[x] = true;
+
+	for (auto i : gr1[x])
+		if (!vis1[i])
+			dfs1(i);
 }
 
-vector<int> Graph::BFS(int componentNum, int src,
-									int visited[])
+// DFS function
+void dfs2(int x)
 {
-	// Mark all the vertices as not visited
-	// Create a queue for BFS
-	queue<int> queue;
+	vis2[x] = true;
 
-	queue.push(src);
+	for (auto i : gr2[x])
+		if (!vis2[i])
+			dfs2(i);
+}
 
-	// Assign Component Number
-	visited[src] = componentNum;
+bool Is_Connected(int n)
+{
+	// Call for correct direction
+	memset(vis1, false, sizeof vis1);
+	dfs1(1);
 
-	// Vector to store all the reachable nodes from 'src'
-	vector<int> reachableNodes;
+	// Call for reverse direction
+	memset(vis2, false, sizeof vis2);
+	dfs2(1);
 
-	while(!queue.empty())
-	{
-		// Dequeue a vertex from queue
-		int u = queue.front();
-		queue.pop();
+	for (int i = 1; i <= n; i++) {
 
-		reachableNodes.push_back(u);
-
-		// Get all adjacent vertices of the dequeued
-		// vertex u. If a adjacent has not been visited,
-		// then mark it visited and enqueue it
-		for (auto itr = adj[u].begin();
-				itr != adj[u].end(); itr++)
-		{
-			if (!visited[*itr])
-			{
-				// Assign Component Number to all the
-				// reachable nodes
-				visited[*itr] = componentNum;
-				queue.push(*itr);
-			}
-		}
+		// If any vertex it not visited in any direction
+		// Then graph is not connected
+		if (!vis1[i] and !vis2[i])
+			return false;
 	}
-	return reachableNodes;
+
+	// If graph is connected
+	return true;
 }
 
-// Display all the Reachable Nodes from a node 'n'
-void displayReachableNodes(int n,
-			unordered_map <int, vector<int> > m)
-{
-	vector<int> temp = m[n];
-	for (int i=0; i<temp.size(); i++)
-		cout << temp[i] << " ";
-
-	cout << endl;
-}
-
-// Find all the reachable nodes for every element
-// in the arr
-void findReachableNodes(Graph g, int arr[], int n)
-{
-	// Get the number of nodes in the graph
-	int V = g.V;
-
-	// Take a integer visited array and initialize
-	// all the elements with 0
-	int visited[V+1];
-	memset(visited, 0, sizeof(visited));
-
-	// Map to store list of reachable Nodes for a
-	// given node.
-	unordered_map <int, vector<int> > m;
-
-	// Initialize component Number with 0
-	int componentNum = 0;
-
-	// For each node in arr[] find reachable
-	// Nodes
-	for (int i = 0 ; i < n ; i++)
-	{
-		int u = arr[i];
-
-		// Visit all the nodes of the component
-		if (!visited[u])
-		{
-			componentNum++;
-
-			// Store the reachable Nodes corresponding to
-			// the node 'i'
-			m[visited[u]] = g.BFS(componentNum, u, visited);
-		}
-
-		// At this point, we have all reachable nodes
-		// from u, print them by doing a look up in map m.
-		cout << "Reachable Nodes from " << u <<" are\n";
-		displayReachableNodes(visited[u], m);
-	}
-}
-
-// Driver program to test above functions
+// Driver code
 int main()
 {
-	// Create a graph given in the above diagram
-	int V = 7;
-	Graph g(V);
-	g.addEdge(1, 2);
-	g.addEdge(2, 3);
-	g.addEdge(3, 4);
-	g.addEdge(3, 1);
-	g.addEdge(5, 6);
-	g.addEdge(5, 7);
+	int n = 4;
 
-	// For every ith element in the arr
-	// find all reachable nodes from query[i]
-	int arr[] = {2, 4, 5};
+	// Add edges
+	Add_edge(1, 2);
+	Add_edge(1, 3);
+	Add_edge(2, 3);
+	Add_edge(3, 4);
 
-	// Find number of elements in Set
-	int n = sizeof(arr)/sizeof(int);
-
-	findReachableNodes(g, arr, n);
+	// Function call
+	if (Is_Connected(n))
+		cout << "Yes";
+	else
+		cout << "No";
 
 	return 0;
 }
